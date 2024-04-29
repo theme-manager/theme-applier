@@ -15,20 +15,26 @@ printUsage() {
 }
 
 # read first two and last two colors from the color hex file
-color0=$(head -n 1 "$HOME/.config/themes/active/colors_hex.txt" | cut -c 2)
-color1=$(head -n 2 "$HOME/.config/themes/active/colors_hex.txt" | cut -c 2)
+color0Hex=$(head -n 1 "$HOME/.config/themes/active/colors_hex.txt" | cut -c 2)
+color1Hex=$(head -n 2 "$HOME/.config/themes/active/colors_hex.txt" | cut -c 2)
+color2Hex=$(tail -n 3 "$HOME/.config/themes/active/colors_hex.txt" | cut -c 2)
+color3Hex=$(tail -n 2 "$HOME/.config/themes/active/colors_hex.txt" | cut -c 2)
+color4Hex=$(tail -n 1 "$HOME/.config/themes/active/colors_hex.txt" | cut -c 2)
 
-color3=$(tail -n 2 "$HOME/.config/themes/active/colors_hex.txt" | cut -c 2)
-color4=$(tail -n 1 "$HOME/.config/themes/active/colors_hex.txt" | cut -c 2)
+color0ShRgb="\\e\[38;2;$(head -n 1 "$HOME/.config/themes/active/colors_rgb.txt" | cut -c 2 | sed "s/ /;/g")"
+color1ShRgb="\\e\[38;2;$(head -n 2 "$HOME/.config/themes/active/colors_rgb.txt" | cut -c 2 | sed "s/ /;/g")"
+color2ShRgb="\\e\[38;2;$(tail -n 3 "$HOME/.config/themes/active/colors_rgb.txt" | cut -c 2 | sed "s/ /;/g")"
+color3ShRgb="\\e\[38;2;$(tail -n 2 "$HOME/.config/themes/active/colors_rgb.txt" | cut -c 2 | sed "s/ /;/g")"
+color4ShRgb="\\e\[38;2;$(tail -n 1 "$HOME/.config/themes/active/colors_rgb.txt" | cut -c 2 | sed "s/ /;/g")"
 
 updateHyprland() {
     while IFS= read -r line; do
         case "$line" in
             col.active_border) 
-                newLine="    col.active_border = rgb($color4)"
+                newLine="    col.active_border = rgb($color4Hex)"
                 sed -e "s/$line/$newLine/" /dir/file > /dir/temp_file ;;
             col.inactive_border)
-                newLine="    col.inactive_border = rgb($color1)"
+                newLine="    col.inactive_border = rgb($color1Hex)"
                 sed -e "s/$line/$newLine/" /dir/file > /dir/temp_file ;;
             *) ;;
         esac
@@ -41,31 +47,51 @@ updateDunst() {
     while IFS= read -r line; do
         case "$line" in
             frame_color) 
-                newLine="    frame_color = \"#$color4\""
+                newLine="    frame_color = \"#$color4Hex\""
                 sed -e "s/$line/$newLine/" /dir/file > /dir/temp_file ;;
             background)
                 if [ $urgencyCritical ]; then
-                    newLine="    background = \"#$color3\""
+                    newLine="    background = \"#$color3Hex\""
                 elif [ $urgencyNormal ]; then
-                    newLine="    background = \"#$color0\""
+                    newLine="    background = \"#$color0Hex\""
                 else 
-                    newLine="    background = \"#$color1\""
+                    newLine="    background = \"#$color1Hex\""
                 fi
                 sed -e "s/$line/$newLine/" /dir/file > /dir/temp_file ;;
             foreground)
                 if [ $urgencyCritical ]; then
-                    newLine="    foreground = \"#$color3\""
+                    newLine="    foreground = \"#$color3Hex\""
                 elif [ $urgencyNormal ]; then
-                    newLine="    foreground = \"#$color0\""
+                    newLine="    foreground = \"#$color0Hex\""
                     urgencyCritical=true
                 else 
-                    newLine="    foreground = \"#$color1\""
+                    newLine="    foreground = \"#$color1Hex\""
                     urgencyNormal=true
                 fi
                 sed -e "s/$line/$newLine/" /dir/file > /dir/temp_file ;;
             *) ;;
         esac
     done < "$HOME/.config/dunst/dunstrc"
+}
+
+editBashRC() {
+    while IFS= read -r line; do
+        case "$line" in
+            "$1")
+                newLine="export $1=$2"
+                sed -e "s/$line/$newLine/" /tmp/bashrc_original > "/tmp/bashrc_edited" ;;
+        esac
+    done < "/tmp/bashrc_original"
+}
+
+updateBashRC() {
+    cp "$HOME/.bashrc" "/tmp/bashrc_original"
+
+    editBashRC "COLOR_USER" "$color4ShRgb"
+    editBashRC "COLOR_PATH" "$color3ShRgb"
+    editBashRC "COLOR_GIT" "$color2ShRgb"
+
+    mv /tmp/file "$HOME/.bashrc"
 }
 
 
@@ -80,6 +106,6 @@ while IFS= read -r line; do
     case "$line" in
         "update_hyprland=1") updateHyprland ;;
         "update_dunst=1") updateDunst ;;
-        *) ;;
+        "update_bashrc=1") updateBashRC ;;
     esac
 done < "$HOME/.config/theme-applier/theme-applier.conf"
