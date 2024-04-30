@@ -14,84 +14,112 @@ printUsage() {
     echo "  -h  --help      Show this help message"
 }
 
-# read first two and last two colors from the color hex file
-color0Hex=$(head -n 1 "$HOME/.config/themes/active/colors_hex.txt" | cut -c 2)
-color1Hex=$(head -n 2 "$HOME/.config/themes/active/colors_hex.txt" | cut -c 2)
-color2Hex=$(tail -n 3 "$HOME/.config/themes/active/colors_hex.txt" | cut -c 2)
-color3Hex=$(tail -n 2 "$HOME/.config/themes/active/colors_hex.txt" | cut -c 2)
-color4Hex=$(tail -n 1 "$HOME/.config/themes/active/colors_hex.txt" | cut -c 2)
+colorHexFile="$HOME/.config/themes/active/colors/colors-hex.txt"
+colorShRgbFile="$HOME/.config/themes/active/colors/colors-rgb.txt"
 
-color0ShRgb="\\e\[38;2;$(head -n 1 "$HOME/.config/themes/active/colors_rgb.txt" | cut -c 2 | sed "s/ /;/g")"
-color1ShRgb="\\e\[38;2;$(head -n 2 "$HOME/.config/themes/active/colors_rgb.txt" | cut -c 2 | sed "s/ /;/g")"
-color2ShRgb="\\e\[38;2;$(tail -n 3 "$HOME/.config/themes/active/colors_rgb.txt" | cut -c 2 | sed "s/ /;/g")"
-color3ShRgb="\\e\[38;2;$(tail -n 2 "$HOME/.config/themes/active/colors_rgb.txt" | cut -c 2 | sed "s/ /;/g")"
-color4ShRgb="\\e\[38;2;$(tail -n 1 "$HOME/.config/themes/active/colors_rgb.txt" | cut -c 2 | sed "s/ /;/g")"
+# removing all empty lines from the color files
+sed -i '/^$/d' "$colorHexFile"
+sed -i '/^$/d' "$colorShRgbFile"
+
+# read first two and last two colors from the color hex file
+color0Hex=$(head -n 1 "$colorHexFile" | sed 's/#//g')
+color1Hex=$(head -n 2 "$colorHexFile" | tail -n 1 | sed 's/#//g')
+color2Hex=$(tail -n 3 "$colorHexFile" | head -n 1 | sed 's/#//g')
+color3Hex=$(tail -n 2 "$colorHexFile" | head -n 1 | sed 's/#//g')
+color4Hex=$(tail -n 1 "$colorHexFile" | sed 's/#//g')
+
+color0ShRgb="e[38;2;$(head -n 1 "$colorShRgbFile" | sed "s/ /;/g")m"
+color1ShRgb="e[38;2;$(head -n 2 "$colorShRgbFile" | sed "s/ /;/g" | tail -n 1)m"
+color2ShRgb="e[38;2;$(tail -n 3 "$colorShRgbFile" | sed "s/ /;/g" | head -n 1)m"
+color3ShRgb="e[38;2;$(tail -n 2 "$colorShRgbFile" | sed "s/ /;/g" | head -n 1)m"
+color4ShRgb="e[38;2;$(tail -n 1 "$colorShRgbFile" | sed "s/ /;/g")m"
+
+hyprlandPath="$HOME/.config/hypr/hyprland.conf"
+bashrcPath="$HOME/.bashrc"
+dunstPath="$HOME/.config/dunst/dunstrc"
+
+printColors() {
+    echo "Hex Colors:"
+    echo "    $color0Hex"
+    echo "    $color1Hex"
+    echo "    $color2Hex"
+    echo "    $color3Hex"
+    echo "    $color4Hex"
+    echo
+    echo "Sh RGB Colors:"
+    echo "    $color0ShRgb"
+    echo "    $color1ShRgb"
+    echo "    $color2ShRgb"
+    echo "    $color3ShRgb"
+    echo "    $color4ShRgb"
+}
 
 updateHyprland() {
+    echo updating the hyprland theme...
+    cp "$hyprlandPath" /tmp/hypr.conf
     while IFS= read -r line; do
         case "$line" in
-            col.active_border) 
+            *" col.active_border"*) 
                 newLine="    col.active_border = rgb($color4Hex)"
-                sed -e "s/$line/$newLine/" /dir/file > /dir/temp_file ;;
-            col.inactive_border)
+                sed -i "s/$line/$newLine/g" /tmp/hypr.conf ;;
+            *" col.inactive_border"*)
                 newLine="    col.inactive_border = rgb($color1Hex)"
-                sed -e "s/$line/$newLine/" /dir/file > /dir/temp_file ;;
-            *) ;;
+                sed -i "s/$line/$newLine/g" /tmp/hypr.conf ;;
         esac
-    done < "$HOME/.config/hypr/hyprland.conf"
+    done < "/tmp/hypr.conf"
+
+    mv /tmp/hypr.conf "$hyprlandPath"
 }
 
 updateDunst() {
-    urgencyNormal=false
-    urgencyCritical=false
+    echo updating the dunst theme...
+    cp "$dunstPath" /tmp/dunst.conf
     while IFS= read -r line; do
         case "$line" in
-            frame_color) 
+            "    frame_color"*) 
                 newLine="    frame_color = \"#$color4Hex\""
-                sed -e "s/$line/$newLine/" /dir/file > /dir/temp_file ;;
-            background)
-                if [ $urgencyCritical ]; then
-                    newLine="    background = \"#$color3Hex\""
-                elif [ $urgencyNormal ]; then
-                    newLine="    background = \"#$color0Hex\""
-                else 
-                    newLine="    background = \"#$color1Hex\""
-                fi
-                sed -e "s/$line/$newLine/" /dir/file > /dir/temp_file ;;
-            foreground)
-                if [ $urgencyCritical ]; then
-                    newLine="    foreground = \"#$color3Hex\""
-                elif [ $urgencyNormal ]; then
-                    newLine="    foreground = \"#$color0Hex\""
-                    urgencyCritical=true
-                else 
-                    newLine="    foreground = \"#$color1Hex\""
-                    urgencyNormal=true
-                fi
-                sed -e "s/$line/$newLine/" /dir/file > /dir/temp_file ;;
-            *) ;;
+                sed -i "s/$line/$newLine/g" /tmp/dunst.conf ;;
+            "    background"*)
+                case "$line" in
+                    *" #0"*) newLine="    background = \"#$color1Hex\" #0";;
+                    *" #1"*) newLine="    background = \"#$color0Hex\" #1";;
+                    *" #2"*) newLine="    background = \"#$color3Hex\" #2";;
+                esac
+                sed -i "s/$line/$newLine/g" /tmp/dunst.conf ;;
+            "    foreground"*)
+                case "$line" in
+                    *" #0"*) newLine="    foreground = \"#$color1Hex\" #0";;
+                    *" #1"*) newLine="    foreground = \"#$color0Hex\" #1";;
+                    *" #2"*) newLine="    foreground = \"#$color3Hex\" #2";;
+                esac
+                sed -i "s/$line/$newLine/g" /tmp/dunst.conf ;;
         esac
-    done < "$HOME/.config/dunst/dunstrc"
+    done < "/tmp/dunst.conf"
+
+    mv /tmp/dunst.conf "$dunstPath"
 }
 
 editBashRC() {
     while IFS= read -r line; do
         case "$line" in
-            "$1")
-                newLine="export $1=$2"
-                sed -e "s/$line/$newLine/" /tmp/bashrc_original > "/tmp/bashrc_edited" ;;
+            "export $1"*)
+                newLine="export ${1}='${2}'"
+                # Throwing the Error "sed: -e Ausdruck #1, Zeichen 80: Nicht beendeter »s«-Befehl"....why?
+                # Ah. It throws it because of the backslash... but how to...not do that?
+                sed -i -e "s|$line|\\$newLine|" /tmp/bashrc_edited
         esac
-    done < "/tmp/bashrc_original"
+    done < "/tmp/bashrc_edited"
 }
 
 updateBashRC() {
-    cp "$HOME/.bashrc" "/tmp/bashrc_original"
+    echo updating the bashrc theme...
+    cp "$bashrcPath" "/tmp/bashrc_edited"
 
-    editBashRC "COLOR_USER" "$color4ShRgb"
-    editBashRC "COLOR_PATH" "$color3ShRgb"
-    editBashRC "COLOR_GIT" "$color2ShRgb"
+    editBashRC "COLOR_USER" "${color4ShRgb}"
+    editBashRC "COLOR_PATH" "${color3ShRgb}"
+    editBashRC "COLOR_GIT" "${color2ShRgb}"
 
-    mv /tmp/file "$HOME/.bashrc"
+    mv /tmp/bashrc_edited "$bashrcPath"
 }
 
 
@@ -107,5 +135,6 @@ while IFS= read -r line; do
         "update_hyprland=1") updateHyprland ;;
         "update_dunst=1") updateDunst ;;
         "update_bashrc=1") updateBashRC ;;
+        "update_qt") printColors ;;
     esac
 done < "$HOME/.config/theme-applier/theme-applier.conf"
