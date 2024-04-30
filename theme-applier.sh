@@ -88,9 +88,9 @@ updateDunst() {
                 sed -i "s/$line/$newLine/g" /tmp/dunst.conf ;;
             "    foreground"*)
                 case "$line" in
-                    *" #0"*) newLine="    foreground = \"#$color1Hex\" #0";;
-                    *" #1"*) newLine="    foreground = \"#$color0Hex\" #1";;
-                    *" #2"*) newLine="    foreground = \"#$color3Hex\" #2";;
+                    *" #0"*) newLine="    foreground = \"#$color4Hex\" #0";;
+                    *" #1"*) newLine="    foreground = \"#$color4Hex\" #1";;
+                    *" #2"*) newLine="    foreground = \"#$color4Hex\" #2";;
                 esac
                 sed -i "s/$line/$newLine/g" /tmp/dunst.conf ;;
         esac
