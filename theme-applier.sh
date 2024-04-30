@@ -100,26 +100,44 @@ updateDunst() {
 }
 
 editBashRC() {
+    num=1
+    lower=""
     while IFS= read -r line; do
         case "$line" in
             "export $1"*)
-                newLine="export ${1}='${2}'"
+                newLine=$(cat <<EOF 
+export ${1}='\\${2}' 
+EOF
+        )
+                echo "$num | $line | $newLine" > /tmp/newLine
                 # Throwing the Error "sed: -e Ausdruck #1, Zeichen 80: Nicht beendeter »s«-Befehl"....why?
                 # Ah. It throws it because of the backslash... but how to...not do that?
-                sed -i -e "s|$line|\\$newLine|" /tmp/bashrc_edited
+                sed -i "${num}"',$d' /tmp/bashrc_edited
+                echo "$num | $line | $newLine" >> /tmp/bashrc_edited
+                #sed -i "${num}i $newLine" /tmp/bashrc_edited
+                #sed -i "s|'e|'\/e|g" /tmp/bashrc_edited
+                # implement this stuff with awk
+                #awk -i inplace 'NR==FNR{a[$0];next} !($0 in a)' /tmp/newLine /tmp/bashrc_edited
+                tr \''e' \''\\e' < /tmp/bashrc_edited > /tmp/newLine
+                lower=""
         esac
-    done < "/tmp/bashrc_edited"
+        lower="$lower\n$line"
+        num=$((num+1))
+    done < "/tmp/bashrc_original"
+    echo "$lower" >> /tmp/bashrc_edited
 }
 
 updateBashRC() {
     echo updating the bashrc theme...
-    cp "$bashrcPath" "/tmp/bashrc_edited"
+    cp "$bashrcPath" "/tmp/bashrc_original"
+    cp "$bashrcPath" /tmp/bashrc_edited
 
     editBashRC "COLOR_USER" "${color4ShRgb}"
     editBashRC "COLOR_PATH" "${color3ShRgb}"
     editBashRC "COLOR_GIT" "${color2ShRgb}"
 
-    mv /tmp/bashrc_edited "$bashrcPath"
+    #rm /tmp/bashrc_original
+    #mv /tmp/bashrc_edited "$bashrcPath"
 }
 
 
@@ -135,6 +153,6 @@ while IFS= read -r line; do
         "update_hyprland=1") updateHyprland ;;
         "update_dunst=1") updateDunst ;;
         "update_bashrc=1") updateBashRC ;;
-        "update_qt") printColors ;;
+        "update_qt=1") printColors ;;
     esac
 done < "$HOME/.config/theme-applier/theme-applier.conf"
