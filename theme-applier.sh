@@ -97,6 +97,7 @@ updateDunst() {
     done < "/tmp/dunst.conf"
 
     mv /tmp/dunst.conf "$dunstPath"
+    killall dunst && dunst &
 }
 
 # Heh, it aint stupid if it works!
