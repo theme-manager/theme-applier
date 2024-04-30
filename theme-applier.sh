@@ -99,32 +99,15 @@ updateDunst() {
     mv /tmp/dunst.conf "$dunstPath"
 }
 
+# Heh, it aint stupid if it works!
 editBashRC() {
-    num=1
-    lower=""
-    while IFS= read -r line; do
-        case "$line" in
-            "export $1"*)
-                newLine=$(cat <<EOF 
-export ${1}='\\${2}' 
-EOF
-        )
-                echo "$num | $line | $newLine" > /tmp/newLine
-                # Throwing the Error "sed: -e Ausdruck #1, Zeichen 80: Nicht beendeter »s«-Befehl"....why?
-                # Ah. It throws it because of the backslash... but how to...not do that?
-                sed -i "${num}"',$d' /tmp/bashrc_edited
-                echo "$num | $line | $newLine" >> /tmp/bashrc_edited
-                #sed -i "${num}i $newLine" /tmp/bashrc_edited
-                #sed -i "s|'e|'\/e|g" /tmp/bashrc_edited
-                # implement this stuff with awk
-                #awk -i inplace 'NR==FNR{a[$0];next} !($0 in a)' /tmp/newLine /tmp/bashrc_edited
-                tr \''e' \''\\e' < /tmp/bashrc_edited > /tmp/newLine
-                lower=""
-        esac
-        lower="$lower\n$line"
-        num=$((num+1))
-    done < "/tmp/bashrc_original"
-    echo "$lower" >> /tmp/bashrc_edited
+    lineNum=$(grep -n "export $1" "/tmp/bashrc_original" | cut -d ':' -f 1)
+    newLine="export $1='\\${2}'"
+    
+    sed -i "${lineNum}"',$d' /tmp/bashrc_edited
+    echo "$newLine" >> /tmp/bashrc_edited
+    lineNum=$((lineNum+1))
+    tail -n "+$lineNum" /tmp/bashrc_original >> /tmp/bashrc_edited
 }
 
 updateBashRC() {
@@ -136,8 +119,13 @@ updateBashRC() {
     editBashRC "COLOR_PATH" "${color3ShRgb}"
     editBashRC "COLOR_GIT" "${color2ShRgb}"
 
-    #rm /tmp/bashrc_original
-    #mv /tmp/bashrc_edited "$bashrcPath"
+    rm /tmp/bashrc_original
+    mv /tmp/bashrc_edited "$bashrcPath"
+}
+
+updateQT() {
+    echo updating the qt theme...
+    echo Not yet implemented
 }
 
 
@@ -153,6 +141,6 @@ while IFS= read -r line; do
         "update_hyprland=1") updateHyprland ;;
         "update_dunst=1") updateDunst ;;
         "update_bashrc=1") updateBashRC ;;
-        "update_qt=1") printColors ;;
+        "update_qt=1") updateQT ;;
     esac
 done < "$HOME/.config/theme-applier/theme-applier.conf"
