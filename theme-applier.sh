@@ -11,10 +11,15 @@ printUsage() {
     echo "  theme-applier.sh [OPTIONS]"
     echo
     echo "Options:"
-    echo "  -h  --help              Show this help message"
-    echo "  -a  --auto  <on/off>    Automatically apply the current theme on system startup"
-    echo "      --auto-update       Flag for automatic execution of this script."
-    echo "                          It checks the auto_update variable in the config and updates, if set to 1"   
+    echo "  -h  --help                      Show this help message"
+    echo "      --auto-update               Flag for automatic execution of this script."
+    echo "                                  It checks the auto_update variable in the config and updates if it is set to 1" 
+    echo "  -s  --set   <name> <on/off>     Set the variable <name> to <on/off>"
+    echo "                                      <auto>:     Automatically apply the current theme on system startup"
+    echo "                                      <hypr>:     Determines if hypr has to be updated when theme is applied"
+    echo "                                      <dunst>:    Determines if dunst has to be updated when theme is applied"
+    echo "                                      <bash>:     Determines if bashrc has to be updated when theme is applied"
+    echo "                                      <qt>:       Determines if qt theme has to be updated when theme is applied"  
 }
 
 colorHexFile="$HOME/.config/themes/active/colors/colors-hex.txt"
@@ -133,17 +138,32 @@ updateQT() {
 }
 
 editApplierConfig() {
-    if [ "$1" != "on" ]; then
-        newLine="auto_update=1"
-    elif [ "$1" != "off" ]; then
-        newLine="auto_update=0"
+    if [ "$1" = "auto" ]; then
+        varName="auto_update"
+    elif [ "$1" = "hypr" ]; then
+        varName="update_hyprland"
+    elif [ "$1" = "dunst" ]; then
+        varName="update_dunst"
+    elif [ "$1" = "bash" ]; then
+        varName="update_bashrc"
+    elif [ "$1" = "qt" ]; then
+        varName="update_qt"
+    else 
+        echo Wrong format on option: "$1"
+        exit 2
+    fi
+
+    if [ "$2" = "on" ]; then
+        newLine="$varName=1"
+    elif [ "$2" = "off" ]; then
+        newLine="$varName=0"
     else
-        echo Wrong format on auto option: "$1"
+        echo Wrong format on auto option: "$2"
         exit 2
     fi
 
     cp "$HOME/.config/theme-applier/theme-applier.conf" /tmp/theme-applier.conf
-    lineNum=$(grep -n "auto_update" "$HOME/.config/theme-applier/theme-applier.conf" | cut -d ':' -f 1)
+    lineNum=$(grep -n "$varName" "$HOME/.config/theme-applier/theme-applier.conf" | cut -d ':' -f 1)
     sed -i "${lineNum}"',$d' "$HOME/.config/theme-applier/theme-applier.conf"
     echo "$newLine" >> "$HOME/.config/theme-applier/theme-applier.conf"
     lineNum=$((lineNum+1))
@@ -154,8 +174,9 @@ editApplierConfig() {
 if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
     printUsage
     exit 0
-fi; if [ "$1" = "-a" ] || [ "$1" = "--auto" ]; then
-    editApplierConfig "$2"
+fi; if [ "$1" = "-s" ] || [ "$1" = "--set" ]; then
+    editApplierConfig "$2" "$3"
+    exit 0
 fi; if [ "$1" = "--auto-update" ]; then
     # Exits the program if in the configuration auto_update is not enabled.
     doAutoUpdate=$(grep -n "auto_update" "$HOME/.config/theme-applier/theme-applier.conf" | cut -d ':' -f 2 | cut -d "=" -f 2)
