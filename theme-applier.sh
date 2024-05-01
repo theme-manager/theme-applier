@@ -11,7 +11,10 @@ printUsage() {
     echo "  theme-applier.sh [OPTIONS]"
     echo
     echo "Options:"
-    echo "  -h  --help      Show this help message"
+    echo "  -h  --help              Show this help message"
+    echo "  -a  --auto  <on/off>    Automatically apply the current theme on system startup"
+    echo "      --auto-update       Flag for automatic execution of this script."
+    echo "                          It checks the auto_update variable in the config and updates, if set to 1"   
 }
 
 colorHexFile="$HOME/.config/themes/active/colors/colors-hex.txt"
@@ -129,11 +132,36 @@ updateQT() {
     echo Not yet implemented
 }
 
+editApplierConfig() {
+    if [ "$1" != "on" ]; then
+        newLine="auto_update=1"
+    elif [ "$1" != "off" ]; then
+        newLine="auto_update=0"
+    else
+        echo Wrong format on auto option: "$1"
+        exit 2
+    fi
+
+    cp "$HOME/.config/theme-applier/theme-applier.conf" /tmp/theme-applier.conf
+    lineNum=$(grep -n "auto_update" "$HOME/.config/theme-applier/theme-applier.conf" | cut -d ':' -f 1)
+    sed -i "${lineNum}"',$d' "$HOME/.config/theme-applier/theme-applier.conf"
+    echo "$newLine" >> "$HOME/.config/theme-applier/theme-applier.conf"
+    lineNum=$((lineNum+1))
+    tail -n "+$lineNum" "/tmp/theme-applier.conf" >> "$HOME/.config/theme-applier/theme-applier.conf"
+}
 
 # check if usage has to be printed
 if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
     printUsage
     exit 0
+fi; if [ "$1" = "-a" ] || [ "$1" = "--auto" ]; then
+    editApplierConfig "$2"
+fi; if [ "$1" = "--auto-update" ]; then
+    # Exits the program if in the configuration auto_update is not enabled.
+    doAutoUpdate=$(grep -n "auto_update" "$HOME/.config/theme-applier/theme-applier.conf" | cut -d ':' -f 2 | cut -d "=" -f 2)
+    if [ "$doAutoUpdate" != "1" ]; then
+        exit 0
+    fi
 fi
 
 # read which configs to edit from the config file
@@ -145,3 +173,6 @@ while IFS= read -r line; do
         "update_qt=1") updateQT ;;
     esac
 done < "$HOME/.config/theme-applier/theme-applier.conf"
+
+#killall hyprpaper
+#hyprpaper &
