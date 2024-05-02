@@ -108,8 +108,8 @@ updateHyprpaper() {
 
     mv /tmp/hyprpaper.conf "$hyprpaperPath"
 
-    killall hyprpaper
-    hyprpaper &
+    (killall hyprpaper) 1>/dev/null
+    (hyprpaper &) 1>/dev/null
 }
 
 updateDunst() {
@@ -184,7 +184,7 @@ updateKitty() {
     cp "$kittyPath" /tmp/kitty_edited
     editKitty "foreground" "$color4Hex"
     cp /tmp/kitty_edited /tmp/kitty_original
-    editKitty "background" "$color1Hex"
+    editKitty "background" "$color0Hex"
 
     cp /tmp/kitty_edited "$kittyPath"
     rm /tmp/kitty_original
