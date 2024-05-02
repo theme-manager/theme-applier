@@ -20,6 +20,7 @@ Options:
                                         <hyprpaper>:    Determines if hyprpaper (Wallpaper) has to be updated when the theme is applied
                                         <dunst>:        Determines if dunst has to be updated when theme is applied
                                         <bash>:         Determines if bashrc has to be updated when theme is applied
+                                        <kitty>:        Determines if kitty has to be updated when theme is applied
                                         <qt>:           Determines if qt theme has to be updated when theme is applied"  
 }
 
@@ -55,6 +56,7 @@ hyprlandPath="$HOME/.config/hypr/hyprland.conf"
 hyprpaperPath="$HOME/.config/hypr/hyprpaper.conf"
 bashrcPath="$HOME/.bashrc"
 dunstPath="$HOME/.config/dunst/dunstrc"
+kittyPath="$HOME/.config/kitty/kitty.conf"
 
 printColors() {
     echo "Hex Colors:"
@@ -164,6 +166,31 @@ updateBashRC() {
     source "$HOME/.bashrc"
 }
 
+editKitty() {
+    lines=$(grep -n "$1 #" "/tmp/kitty_original" | grep -v ':#' | cut -d ':' -f 1)
+    for lineNum in $lines; do
+        newLine="$1 #$2"
+        
+        sed -i "${lineNum}"',$d' /tmp/kitty_edited
+        echo "$newLine" >> /tmp/kitty_edited
+        lineNum=$((lineNum+1))
+        tail -n "+$lineNum" /tmp/kitty_original >> /tmp/kitty_edited
+    done
+}
+
+updateKitty() {
+    echo updating the kitty theme...
+    cp "$kittyPath" /tmp/kitty_original
+    cp "$kittyPath" /tmp/kitty_edited
+    editKitty "foreground" "$color4Hex"
+    cp /tmp/kitty_edited /tmp/kitty_original
+    editKitty "background" "$color1Hex"
+
+    cp /tmp/kitty_edited "$kittyPath"
+    rm /tmp/kitty_original
+    rm /tmp/kitty_edited
+}
+
 updateQT() {
     echo updating the qt theme...
     echo Not yet implemented
@@ -178,6 +205,8 @@ editApplierConfig() {
         varName="update_dunst"
     elif [ "$1" = "bash" ]; then
         varName="update_bashrc"
+    elif [ "$1" = "kitty" ]; then
+        varName="update_kitty"
     elif [ "$1" = "qt" ]; then
         varName="update_qt"
     else 
@@ -224,6 +253,7 @@ while IFS= read -r line; do
         "update_hyprpaper=1") updateHyprpaper ;;
         "update_dunst=1") updateDunst ;;
         "update_bashrc=1") updateBashRC ;;
+        "update_kitty=1") updateKitty ;;
         "update_qt=1") updateQT ;;
     esac
 done < "$HOME/.config/theme-applier/theme-applier.conf"
