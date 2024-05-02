@@ -15,11 +15,12 @@ printUsage() {
     echo "      --auto-update               Flag for automatic execution of this script."
     echo "                                  It checks the auto_update variable in the config and updates if it is set to 1" 
     echo "  -s  --set   <name> <on/off>     Set the variable <name> to <on/off>"
-    echo "                                      <auto>:     Automatically apply the current theme on system startup"
-    echo "                                      <hypr>:     Determines if hypr has to be updated when theme is applied"
-    echo "                                      <dunst>:    Determines if dunst has to be updated when theme is applied"
-    echo "                                      <bash>:     Determines if bashrc has to be updated when theme is applied"
-    echo "                                      <qt>:       Determines if qt theme has to be updated when theme is applied"  
+    echo "                                      <auto>:         Automatically apply the current theme on system startup"
+    echo "                                      <hyprland>:     Determines if hyprland has to be updated when theme is applied"
+    echo "                                      <hyprpaper>:    Determines if hyprpaper (Wallpaper) has to be updated when the theme is applied"
+    echo "                                      <dunst>:        Determines if dunst has to be updated when theme is applied"
+    echo "                                      <bash>:         Determines if bashrc has to be updated when theme is applied"
+    echo "                                      <qt>:           Determines if qt theme has to be updated when theme is applied"  
 }
 
 colorHexFile="$HOME/.config/themes/active/colors/colors-hex.txt"
@@ -43,6 +44,7 @@ color3ShRgb="e[38;2;$(tail -n 2 "$colorShRgbFile" | sed "s/ /;/g" | head -n 1)m"
 color4ShRgb="e[38;2;$(tail -n 1 "$colorShRgbFile" | sed "s/ /;/g")m"
 
 hyprlandPath="$HOME/.config/hypr/hyprland.conf"
+hyprpaperPath="$HOME/.config/hypr/hyprpaper.conf"
 bashrcPath="$HOME/.bashrc"
 dunstPath="$HOME/.config/dunst/dunstrc"
 
@@ -64,19 +66,40 @@ printColors() {
 
 updateHyprland() {
     echo updating the hyprland theme...
-    cp "$hyprlandPath" /tmp/hypr.conf
+    cp "$hyprlandPath" /tmp/hyprland.conf
     while IFS= read -r line; do
         case "$line" in
             *" col.active_border"*) 
                 newLine="    col.active_border = rgb($color4Hex)"
-                sed -i "s/$line/$newLine/g" /tmp/hypr.conf ;;
+                sed -i "s/$line/$newLine/g" /tmp/hyprland.conf ;;
             *" col.inactive_border"*)
                 newLine="    col.inactive_border = rgb($color1Hex)"
-                sed -i "s/$line/$newLine/g" /tmp/hypr.conf ;;
+                sed -i "s/$line/$newLine/g" /tmp/hyprland.conf ;;
         esac
-    done < "/tmp/hypr.conf"
+    done < "/tmp/hyprland.conf"
 
-    mv /tmp/hypr.conf "$hyprlandPath"
+    mv /tmp/hyprland.conf "$hyprlandPath"
+}
+
+updateHyprpaper() {
+    echo updating the hyprpaper wallpaper path...
+    cp "$hyprpaperPath" /tmp/hyprpaper.conf
+    wallpaperPath="$HOME/.config/themes/active/Wallpaper/$(ls ~/.config/themes/active/Wallpaper/)"
+    while IFS= read -r line; do
+        case "$line" in
+            "preload"*) 
+                newLine="preload = $wallpaperPath"
+                sed -i "s|$line|$newLine|g" /tmp/hyprpaper.conf ;;
+            "wallpaper"*)
+                newLine="wallpaper = eDP-2, $wallpaperPath"
+                sed -i "s|$line|$newLine|g" /tmp/hyprpaper.conf ;;
+        esac
+    done < "/tmp/hyprpaper.conf"
+
+    mv /tmp/hyprpaper.conf "$hyprpaperPath"
+
+    killall hyprpaper
+    hyprpaper &
 }
 
 updateDunst() {
@@ -130,6 +153,7 @@ updateBashRC() {
 
     rm /tmp/bashrc_original
     mv /tmp/bashrc_edited "$bashrcPath"
+    source "$HOME/.bashrc"
 }
 
 updateQT() {
@@ -189,11 +213,9 @@ fi
 while IFS= read -r line; do
     case "$line" in
         "update_hyprland=1") updateHyprland ;;
+        "update_hyprpaper=1") updateHyprpaper ;;
         "update_dunst=1") updateDunst ;;
         "update_bashrc=1") updateBashRC ;;
         "update_qt=1") updateQT ;;
     esac
 done < "$HOME/.config/theme-applier/theme-applier.conf"
-
-#killall hyprpaper
-#hyprpaper &
