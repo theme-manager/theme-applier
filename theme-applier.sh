@@ -2,26 +2,34 @@
 
 # functions
 printUsage() {
-    echo "Description:"
-    echo "  Applies the active theme in '$HOME/.config/themes/active' to config files"
-    echo "  wich do not depend on .css files. Which config files get edited is dependant on"
-    echo "  the configuration in '$HOME/.config/theme-applier/theme-applier.conf'"
-    echo
-    echo "Usage:"
-    echo "  theme-applier.sh [OPTIONS]"
-    echo
-    echo "Options:"
-    echo "  -h  --help                      Show this help message"
-    echo "      --auto-update               Flag for automatic execution of this script."
-    echo "                                  It checks the auto_update variable in the config and updates if it is set to 1" 
-    echo "  -s  --set   <name> <on/off>     Set the variable <name> to <on/off>"
-    echo "                                      <auto>:         Automatically apply the current theme on system startup"
-    echo "                                      <hyprland>:     Determines if hyprland has to be updated when theme is applied"
-    echo "                                      <hyprpaper>:    Determines if hyprpaper (Wallpaper) has to be updated when the theme is applied"
-    echo "                                      <dunst>:        Determines if dunst has to be updated when theme is applied"
-    echo "                                      <bash>:         Determines if bashrc has to be updated when theme is applied"
-    echo "                                      <qt>:           Determines if qt theme has to be updated when theme is applied"  
+    echo "Description:
+    Applies the active theme in '$HOME/.config/themes/active' to config files
+    wich do not depend on .css files. Which config files get edited is dependant on
+    the configuration in '$HOME/.config/theme-applier/theme-applier.conf'
+    
+Usage:
+    theme-applier.sh [OPTIONS]
+    
+Options:
+    -h  --help                      Show this help message
+        --auto-update               Flag for automatic execution of this script.
+                                    It checks the auto_update variable in the config and updates if it is set to 1
+    -s  --set   <name> <on/off>     Set the variable <name> to <on/off>
+                                        <auto>:         Automatically apply the current theme on system startup
+                                        <hyprland>:     Determines if hyprland has to be updated when theme is applied
+                                        <hyprpaper>:    Determines if hyprpaper (Wallpaper) has to be updated when the theme is applied
+                                        <dunst>:        Determines if dunst has to be updated when theme is applied
+                                        <bash>:         Determines if bashrc has to be updated when theme is applied
+                                        <qt>:           Determines if qt theme has to be updated when theme is applied"  
 }
+
+# error codes
+# 0 - success
+# 1 - missing argument(s)
+# 2 - wrong argument(s)
+# 3 - missing dependecy
+# 4 - wrong configuration file
+# 5 - internal error
 
 colorHexFile="$HOME/.config/themes/active/colors/colors-hex.txt"
 colorShRgbFile="$HOME/.config/themes/active/colors/colors-rgb.txt"
