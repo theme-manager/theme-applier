@@ -1,10 +1,10 @@
 # theme-applier
 Applies the active theme in ```$HOME/.config/themes/active``` to config files  
 wich do not depend on .css files.  
-Which config files get edited is dependant on the configuration in ```$HOME/.config/theme-applier/theme-applier.conf```.
+Which config files get edited is dependant on the configuration in ```$HOME/.config/theme-manager/theme-applier.conf```.
 
 ## Installation
-The installation is easy. Just put the shell script in your ```$HOME/.config/theme-applier``` directory and create the config file in the same directory.
+The installation is easy. Just put the shell script in your ```$HOME/.config/theme-manager``` directory and create the config file in the same directory.
 
 ## Usage
 

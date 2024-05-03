@@ -32,8 +32,8 @@ Options:
 # 4 - wrong configuration file
 # 5 - internal error
 
-colorHexFile="$HOME/.config/themes/active/colors/colors-hex.txt"
-colorShRgbFile="$HOME/.config/themes/active/colors/colors-rgb.txt"
+colorHexFile="$HOME/.config/theme-manager/themes/active/colors/colors-hex.txt"
+colorShRgbFile="$HOME/.config/theme-manager/themes/active/colors/colors-rgb.txt"
 
 # removing all empty lines from the color files
 sed -i '/^$/d' "$colorHexFile"
@@ -94,7 +94,7 @@ updateHyprland() {
 updateHyprpaper() {
     echo updating the hyprpaper wallpaper path...
     cp "$hyprpaperPath" /tmp/hyprpaper.conf
-    wallpaperPath="$HOME/.config/themes/active/Wallpaper/$(ls ~/.config/themes/active/Wallpaper/)"
+    wallpaperPath="$HOME/.config/theme-manager/themes/active/Wallpaper/$(ls "$HOME/.config/theme-manager/themes/active/Wallpaper/")"
     while IFS= read -r line; do
         case "$line" in
             "preload"*) 
@@ -223,12 +223,12 @@ editApplierConfig() {
         exit 2
     fi
 
-    cp "$HOME/.config/theme-applier/theme-applier.conf" /tmp/theme-applier.conf
-    lineNum=$(grep -n "$varName" "$HOME/.config/theme-applier/theme-applier.conf" | cut -d ':' -f 1)
-    sed -i "${lineNum}"',$d' "$HOME/.config/theme-applier/theme-applier.conf"
-    echo "$newLine" >> "$HOME/.config/theme-applier/theme-applier.conf"
+    cp "$HOME/.config/theme-manager/theme-applier.conf" /tmp/theme-applier.conf
+    lineNum=$(grep -n "$varName" "$HOME/.config/theme-manager/theme-applier.conf" | cut -d ':' -f 1)
+    sed -i "${lineNum}"',$d' "$HOME/.config/theme-manager/theme-applier.conf"
+    echo "$newLine" >> "$HOME/.config/theme-manager/theme-applier.conf"
     lineNum=$((lineNum+1))
-    tail -n "+$lineNum" "/tmp/theme-applier.conf" >> "$HOME/.config/theme-applier/theme-applier.conf"
+    tail -n "+$lineNum" "/tmp/theme-manager.conf" >> "$HOME/.config/theme-manager/theme-applier.conf"
 }
 
 # check if usage has to be printed
@@ -240,7 +240,7 @@ fi; if [ "$1" = "-s" ] || [ "$1" = "--set" ]; then
     exit 0
 fi; if [ "$1" = "--auto-update" ]; then
     # Exits the program if in the configuration auto_update is not enabled.
-    doAutoUpdate=$(grep -n "auto_update" "$HOME/.config/theme-applier/theme-applier.conf" | cut -d ':' -f 2 | cut -d "=" -f 2)
+    doAutoUpdate=$(grep -n "auto_update" "$HOME/.config/theme-manager/theme-applier.conf" | cut -d ':' -f 2 | cut -d "=" -f 2)
     if [ "$doAutoUpdate" != "1" ]; then
         exit 0
     fi
@@ -256,4 +256,4 @@ while IFS= read -r line; do
         "update_kitty=1") updateKitty ;;
         "update_qt=1") updateQT ;;
     esac
-done < "$HOME/.config/theme-applier/theme-applier.conf"
+done < "$HOME/.config/theme-manager/theme-applier.conf"
