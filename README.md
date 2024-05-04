@@ -25,7 +25,10 @@ The installation is easy. Just put the shell script in your ```$HOME/.config/the
 
     # The configuration file for the theme-applier
     auto_update=0
-    update_hyprland=0
+    update_hyprland=1
+    update_hyprpaper=1
     update_dunst=1
+    update_waybar=1
     update_bashrc=1
+    update_kitty=1
     update_qt=0
