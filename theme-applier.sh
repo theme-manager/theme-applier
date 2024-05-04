@@ -19,6 +19,7 @@ Options:
                                         <hyprland>:     Determines if hyprland has to be updated when theme is applied
                                         <hyprpaper>:    Determines if hyprpaper (Wallpaper) has to be updated when the theme is applied
                                         <dunst>:        Determines if dunst has to be updated when theme is applied
+                                        <waybar>:       Determines if waybar has to be updated when theme is applied
                                         <bash>:         Determines if bashrc has to be updated when theme is applied
                                         <kitty>:        Determines if kitty has to be updated when theme is applied
                                         <qt>:           Determines if qt theme has to be updated when theme is applied"  
@@ -141,6 +142,12 @@ updateDunst() {
     killall dunst && dunst &
 }
 
+updateWaybar() {
+    echo rebooting waybar...
+    killall waybar
+    (waybar &) 1>/dev/null
+}
+
 # Heh, it aint stupid if it works!
 editBashRC() {
     lineNum=$(grep -n "export $1" "/tmp/bashrc_original" | cut -d ':' -f 1)
@@ -209,6 +216,8 @@ editApplierConfig() {
         varName="update_kitty"
     elif [ "$1" = "qt" ]; then
         varName="update_qt"
+    elif [ "$1" = "waybar" ]; then
+        varName="update_waybar"
     else 
         echo Wrong format on option: "$1"
         exit 2
@@ -252,6 +261,7 @@ while IFS= read -r line; do
         "update_hyprland=1") updateHyprland ;;
         "update_hyprpaper=1") updateHyprpaper ;;
         "update_dunst=1") updateDunst ;;
+        "update_waybar=1") updateWaybar ;;
         "update_bashrc=1") updateBashRC ;;
         "update_kitty=1") updateKitty ;;
         "update_qt=1") updateQT ;;
