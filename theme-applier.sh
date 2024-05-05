@@ -204,24 +204,16 @@ updateQT() {
 }
 
 editApplierConfig() {
-    if [ "$1" = "auto" ]; then
-        varName="auto_update"
-    elif [ "$1" = "hypr" ]; then
-        varName="update_hyprland"
-    elif [ "$1" = "dunst" ]; then
-        varName="update_dunst"
-    elif [ "$1" = "bash" ]; then
-        varName="update_bashrc"
-    elif [ "$1" = "kitty" ]; then
-        varName="update_kitty"
-    elif [ "$1" = "qt" ]; then
-        varName="update_qt"
-    elif [ "$1" = "waybar" ]; then
-        varName="update_waybar"
-    else 
-        echo Wrong format on option: "$1"
-        exit 2
-    fi
+    case "$1" in
+        auto) varName='auto_update' ;;
+        hypr) varName='update_hyprland' ;;
+        dunst) varName='update_dunst' ;;
+        bash) varName='update_bashrc' ;;
+        kitty) varName='update_kitty' ;;
+        qt) varName='update_qt' ;;
+        waybar) varName='update_waybar' ;;
+        *) echo Wrong format on option: "$1"; exit 2 ;;
+    esac
 
     if [ "$2" = "on" ]; then
         newLine="$varName=1"
