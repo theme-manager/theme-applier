@@ -179,7 +179,7 @@ updateBashRC() {
 
     rm /tmp/bashrc_original
     mv /tmp/bashrc_edited "$bashrcPath"
-    source "$HOME/.bashrc"
+    #source "$HOME/.bashrc"
 }
 
 editKitty() {
@@ -239,7 +239,7 @@ editApplierConfig() {
     sed -i "${lineNum}"',$d' "$HOME/.config/theme-manager/theme-applier.conf"
     echo "$newLine" >> "$HOME/.config/theme-manager/theme-applier.conf"
     lineNum=$((lineNum+1))
-    tail -n "+$lineNum" "/tmp/theme-manager.conf" >> "$HOME/.config/theme-manager/theme-applier.conf"
+    tail -n "+$lineNum" "/tmp/theme-applier.conf" >> "$HOME/.config/theme-manager/theme-applier.conf"
 }
 
 # check if usage has to be printed
