@@ -225,9 +225,9 @@ editApplierConfig() {
         *) echo Wrong format on option: "$1"; exit 2 ;;
     esac
 
-    if [ "$2" = "on" ]; then
+    if [ "$2" = "on" ] || [ "$2" = "1" ]; then
         newLine="$varName=1"
-    elif [ "$2" = "off" ]; then
+    elif [ "$2" = "off" ] || [ "$2" = "0" ]; then
         newLine="$varName=0"
     else
         echo Wrong format on auto option: "$2"
