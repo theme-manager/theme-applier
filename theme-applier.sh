@@ -30,7 +30,8 @@ Options:
                                         <waybar>:       Determines if waybar has to be updated when theme is applied
                                         <bash>:         Determines if bashrc has to be updated when theme is applied
                                         <kitty>:        Determines if kitty has to be updated when theme is applied
-                                        <qt>:           Determines if qt theme has to be updated when theme is applied"  
+                                        <qt>:           Determines if qt theme has to be updated when theme is applied  
+    -g  --get   <name>              Get the value of the variable <name>"  
 }
 
 # error codes
@@ -214,7 +215,8 @@ updateQT() {
 editApplierConfig() {
     case "$1" in
         auto) varName='auto_update' ;;
-        hypr) varName='update_hyprland' ;;
+        hyprland) varName='update_hyprland' ;;
+        hyprpaper) varName='update_hyprpaper' ;;
         dunst) varName='update_dunst' ;;
         bash) varName='update_bashrc' ;;
         kitty) varName='update_kitty' ;;
@@ -264,6 +266,22 @@ fi; if [ "$1" = "-a" ] || [ "$1" = "--appy" ]; then
         esac
         tmp="$rest"
     done
+    exit 0
+fi; if [ "$1" = "-g" ] || [ "$1" = "--get" ]; then 
+    case "$2" in
+        auto) varName='auto_update' ;;
+        hyprland) varName='update_hyprland' ;;
+        hyprpaper) varName='update_hyprpaper' ;;
+        dunst) varName='update_dunst' ;;
+        bash) varName='update_bashrc' ;;
+        kitty) varName='update_kitty' ;;
+        qt) varName='update_qt' ;;
+        waybar) varName='update_waybar' ;;
+        *) echo Wrong format on option: "$1"; exit 2 ;;
+    esac
+
+    value=$(grep -n "$varName" "$HOME/.config/theme-manager/theme-applier.conf" | cut -d '=' -f 2)
+    echo "$value"
     exit 0
 fi; if [ "$1" = "--auto-update" ]; then
     # Exits the program if in the configuration auto_update is not enabled.

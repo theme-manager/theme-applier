@@ -28,6 +28,7 @@ The installation is easy. Just put the shell script in your ```$HOME/.config/the
                                           <dunst>:    Determines if dunst has to be updated when theme is applied
                                           <bash>:     Determines if bashrc has to be updated when theme is applied
                                           <qt>:       Determines if qt theme has to be updated when theme is applied
+      -g  --get   <name>              Get the value of the variable <name>
 
 ## Example config file
 
