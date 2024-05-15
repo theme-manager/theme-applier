@@ -14,6 +14,14 @@ The installation is easy. Just put the shell script in your ```$HOME/.config/the
       -h  --help                      Show this help message
           --auto-update               Flag for automatic execution of this script.
                                       It checks the auto_update variable in the config and updates if it is set to 1
+      -a  --apply <variable> ...      Apply theme <variables>:    
+                                          h: Applies Hyprland
+                                          p: Applies Hyprpaper
+                                          d: Applies dunst
+                                          w: Applies waybar
+                                          b: Applies bashrc
+                                          k: Applies kitty
+                                          q: Applies qt theme
       -s  --set   <name> <on/off>     Set the variable <name> to <on/off>
                                           <auto>:     Automatically apply the current theme on system startup
                                           <hypr>:     Determines if hypr has to be updated when theme is applied

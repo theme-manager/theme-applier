@@ -14,6 +14,14 @@ Options:
     -h  --help                      Show this help message
         --auto-update               Flag for automatic execution of this script.
                                     It checks the auto_update variable in the config and updates if it is set to 1
+    -a  --apply <variable> ...      Apply theme <variables>:    
+                                        h: Applies Hyprland
+                                        p: Applies Hyprpaper
+                                        d: Applies dunst
+                                        w: Applies waybar
+                                        b: Applies bashrc
+                                        k: Applies kitty
+                                        q: Applies qt theme
     -s  --set   <name> <on/off>     Set the variable <name> to <on/off>
                                         <auto>:         Automatically apply the current theme on system startup
                                         <hyprland>:     Determines if hyprland has to be updated when theme is applied
@@ -238,6 +246,24 @@ if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
     exit 0
 fi; if [ "$1" = "-s" ] || [ "$1" = "--set" ]; then
     editApplierConfig "$2" "$3"
+    exit 0
+fi; if [ "$1" = "-a" ] || [ "$1" = "--appy" ]; then
+    tmp="$2"
+    while [ -n "$tmp" ]; do
+        rest="${tmp#?}"         # All but the first character of the string
+        first="${tmp%"$rest"}"  # Remove $rest, and you're left with the first character
+        case "$first" in
+            h) updateHyprland ;;
+            p) updateHyprpaper ;;
+            d) updateDunst ;;
+            b) updateBashRC ;;
+            k) updateKitty ;;
+            q) updateQT ;;
+            w) updateWaybar ;;
+            *) echo Wrong format on option: "$first"; exit 2 ;;
+        esac
+        tmp="$rest"
+    done
     exit 0
 fi; if [ "$1" = "--auto-update" ]; then
     # Exits the program if in the configuration auto_update is not enabled.
