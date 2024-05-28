@@ -8,11 +8,11 @@ printUsage() {
     the configuration in '$HOME/.config/theme-applier/theme-applier.conf'
     
 Usage:
-    theme-applier.sh [OPTIONS]
+    theme-applier.sh [OPTION] ...
     
 Options:
     -h  --help                      Show this help message
-        --auto-update               Flag for automatic execution of this script.
+        --auto-update               Flag to 'detect' automatic execution of this script.
                                     It checks the auto_update variable in the config and updates if it is set to 1
     -a  --apply <variable> ...      Apply theme <variables>:    
                                         h: Applies Hyprland
