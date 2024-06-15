@@ -8,7 +8,7 @@ The installation is easy. Just put the shell script in your ```$HOME/.config/the
 
 ## Usage
 
-    theme-applier.sh [OPTION] ... "
+    theme-applier.sh <OPTION> ... "
 
     Options:
       -h  --help                      Show this help message
