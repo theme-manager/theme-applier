@@ -8,7 +8,7 @@ printUsage() {
     the configuration in '$HOME/.config/theme-applier/theme-applier.conf'
     
 Usage:
-    theme-applier.sh [OPTION] ...
+    theme-applier <OPTION> ...
     
 Options:
     -h  --help                      Show this help message
@@ -41,6 +41,15 @@ Options:
 # 3 - missing dependecy
 # 4 - wrong configuration file
 # 5 - internal error
+
+# Prints the given error message and exits with the given exit code
+# $1 - exit code
+# $2 - error message
+printErr() {
+    echo "Error: $2" >&2
+    echo "Use -h or --help to display help" >&2
+    exit "$1"
+}
 
 colorHexFile="$HOME/.config/theme-manager/themes/active/colors/colors-hex.txt"
 colorShRgbFile="$HOME/.config/theme-manager/themes/active/colors/colors-rgb.txt"
@@ -222,7 +231,7 @@ editApplierConfig() {
         kitty) varName='update_kitty' ;;
         qt) varName='update_qt' ;;
         waybar) varName='update_waybar' ;;
-        *) echo Wrong format on option: "$1"; exit 2 ;;
+        *) printErr 2 "Wrong format on option: '$1'" ;;
     esac
 
     if [ "$2" = "on" ] || [ "$2" = "1" ]; then
@@ -230,8 +239,7 @@ editApplierConfig() {
     elif [ "$2" = "off" ] || [ "$2" = "0" ]; then
         newLine="$varName=0"
     else
-        echo Wrong format on auto option: "$2"
-        exit 2
+        printErr 2 "Wrong format on option: '$2'"
     fi
 
     cp "$HOME/.config/theme-manager/theme-applier.conf" /tmp/theme-applier.conf
@@ -242,54 +250,48 @@ editApplierConfig() {
     tail -n "+$lineNum" "/tmp/theme-applier.conf" >> "$HOME/.config/theme-manager/theme-applier.conf"
 }
 
-# check if usage has to be printed
-if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
-    printUsage
-    exit 0
-fi; if [ "$1" = "-s" ] || [ "$1" = "--set" ]; then
-    editApplierConfig "$2" "$3"
-    exit 0
-fi; if [ "$1" = "-a" ] || [ "$1" = "--appy" ]; then
-    tmp="$2"
-    while [ -n "$tmp" ]; do
-        rest="${tmp#?}"         # All but the first character of the string
-        first="${tmp%"$rest"}"  # Remove $rest, and you're left with the first character
-        case "$first" in
-            h) updateHyprland ;;
-            p) updateHyprpaper ;;
-            d) updateDunst ;;
-            b) updateBashRC ;;
-            k) updateKitty ;;
-            q) updateQT ;;
-            w) updateWaybar ;;
-            *) echo Wrong format on option: "$first"; exit 2 ;;
+# check the parameters
+case "$1" in
+    -h|--help) printUsage ;;
+    -s|--set) editApplierConfig "$2" "$3" ;;
+    -a|--appy)
+        tmp="$2"
+        while [ -n "$tmp" ]; do
+            rest="${tmp#?}"         # All but the first character of the string
+            first="${tmp%"$rest"}"  # Remove $rest, and you're left with the first character
+            case "$first" in
+                h) updateHyprland ;;
+                p) updateHyprpaper ;;
+                d) updateDunst ;;
+                b) updateBashRC ;;
+                k) updateKitty ;;
+                q) updateQT ;;
+                w) updateWaybar ;;
+                *) echo Wrong format on option: "$first"; exit 2 ;;
+            esac
+            tmp="$rest"
+        done ;;
+    -g|--get)
+        case "$2" in
+            auto) varName='auto_update' ;;
+            hyprland) varName='update_hyprland' ;;
+            hyprpaper) varName='update_hyprpaper' ;;
+            dunst) varName='update_dunst' ;;
+            bash) varName='update_bashrc' ;;
+            kitty) varName='update_kitty' ;;
+            qt) varName='update_qt' ;;
+            waybar) varName='update_waybar' ;;
+            *) echo Wrong format on option: "$1"; exit 2 ;;
         esac
-        tmp="$rest"
-    done
-    exit 0
-fi; if [ "$1" = "-g" ] || [ "$1" = "--get" ]; then 
-    case "$2" in
-        auto) varName='auto_update' ;;
-        hyprland) varName='update_hyprland' ;;
-        hyprpaper) varName='update_hyprpaper' ;;
-        dunst) varName='update_dunst' ;;
-        bash) varName='update_bashrc' ;;
-        kitty) varName='update_kitty' ;;
-        qt) varName='update_qt' ;;
-        waybar) varName='update_waybar' ;;
-        *) echo Wrong format on option: "$1"; exit 2 ;;
-    esac
 
-    value=$(grep -n "$varName" "$HOME/.config/theme-manager/theme-applier.conf" | cut -d '=' -f 2)
-    echo "$value"
-    exit 0
-fi; if [ "$1" = "--auto-update" ]; then
-    # Exits the program if in the configuration auto_update is not enabled.
-    doAutoUpdate=$(grep -n "auto_update" "$HOME/.config/theme-manager/theme-applier.conf" | cut -d ':' -f 2 | cut -d "=" -f 2)
-    if [ "$doAutoUpdate" != "1" ]; then
-        exit 0
-    fi
-fi
+        value=$(grep -n "$varName" "$HOME/.config/theme-manager/theme-applier.conf" | cut -d '=' -f 2)
+        echo "$value" ;;
+    --auto-update)
+        # Exits the program if in the configuration auto_update is not enabled.
+        doAutoUpdate=$(grep -n "auto_update" "$HOME/.config/theme-manager/theme-applier.conf" | cut -d ':' -f 2 | cut -d "=" -f 2)
+        [ "$doAutoUpdate" = "1" ] || exit 0 ;;
+    *) printErr 2 "Wrong option: '$1'" ;;
+esac
 
 # read which configs to edit from the config file
 while IFS= read -r line; do
