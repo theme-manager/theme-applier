@@ -1,5 +1,5 @@
 # theme-applier
-Applies the active theme in ```$HOME/.config/themes/active``` to config files  
+Applies the active theme in ```$HOME/.config/theme-manager/themes/active``` to config files  
 wich do not depend on .css files.  
 Which config files get edited is dependant on the configuration in ```$HOME/.config/theme-manager/theme-applier.conf```.
 
