@@ -96,35 +96,20 @@ printColors() {
 updateHyprland() {
     echo updating the hyprland theme...
     cp "$hyprlandPath" /tmp/hyprland.conf
-    while IFS= read -r line; do
-        case "$line" in
-            *" col.active_border"*) 
-                newLine="    col.active_border = rgb($color4Hex)"
-                sed -i "s/$line/$newLine/g" /tmp/hyprland.conf ;;
-            *" col.inactive_border"*)
-                newLine="    col.inactive_border = rgb($color1Hex)"
-                sed -i "s/$line/$newLine/g" /tmp/hyprland.conf ;;
-        esac
-    done < "/tmp/hyprland.conf"
 
+    sed -i "s/col.active_border = [^#]*/col.active_border = rgb($color4Hex)/g" "/tmp/hyprland.conf"
+    sed -i "s/col.inactive_border = [^#]*/col.inactive_border = rgb($color1Hex)/g" "/tmp/hyprland.conf"
     mv /tmp/hyprland.conf "$hyprlandPath"
 }
 
 updateHyprpaper() {
     echo updating the hyprpaper wallpaper path...
     cp "$hyprpaperPath" /tmp/hyprpaper.conf
-    wallpaperPath="$HOME/.config/theme-manager/themes/active/Wallpaper/$(ls "$HOME/.config/theme-manager/themes/active/Wallpaper/")"
-    while IFS= read -r line; do
-        case "$line" in
-            "preload"*) 
-                newLine="preload = $wallpaperPath"
-                sed -i "s|$line|$newLine|g" /tmp/hyprpaper.conf ;;
-            "wallpaper"*)
-                newLine="wallpaper = eDP-2, $wallpaperPath"
-                sed -i "s|$line|$newLine|g" /tmp/hyprpaper.conf ;;
-        esac
-    done < "/tmp/hyprpaper.conf"
-
+    wallpaper="$(ls "$HOME/.config/theme-manager/themes/active/Wallpaper/")"
+    wallpaperPath="$HOME/.config/theme-manager/themes/active/Wallpaper/$wallpaper"
+    
+    # Replaces all paths with the new path
+    sed -i "s|/[^ ]*|$wallpaperPath|g" /tmp/hyprpaper.conf
     mv /tmp/hyprpaper.conf "$hyprpaperPath"
 
     (killall hyprpaper) 1>/dev/null
@@ -133,30 +118,17 @@ updateHyprpaper() {
 
 updateDunst() {
     echo updating the dunst theme...
-    cp "$dunstPath" /tmp/dunst.conf
-    while IFS= read -r line; do
-        case "$line" in
-            "    frame_color"*) 
-                newLine="    frame_color = \"#$color4Hex\""
-                sed -i "s/$line/$newLine/g" /tmp/dunst.conf ;;
-            "    background"*)
-                case "$line" in
-                    *" #0"*) newLine="    background = \"#$color1Hex\" #0";;
-                    *" #1"*) newLine="    background = \"#$color0Hex\" #1";;
-                    *" #2"*) newLine="    background = \"#$color3Hex\" #2";;
-                esac
-                sed -i "s/$line/$newLine/g" /tmp/dunst.conf ;;
-            "    foreground"*)
-                case "$line" in
-                    *" #0"*) newLine="    foreground = \"#$color4Hex\" #0";;
-                    *" #1"*) newLine="    foreground = \"#$color4Hex\" #1";;
-                    *" #2"*) newLine="    foreground = \"#$color4Hex\" #2";;
-                esac
-                sed -i "s/$line/$newLine/g" /tmp/dunst.conf ;;
-        esac
-    done < "/tmp/dunst.conf"
+    cp "$dunstPath" /tmp/dunstrc
 
-    mv /tmp/dunst.conf "$dunstPath"
+    sed -i "s/frame_color[ ]*=[ ]*\"#[^\"]*\"/frame_color = \"#$color4Hex\"/g" /tmp/dunstrc
+    sed -i "s/background[ ]*=[ ]*\"#[^\"]*\"[ ]*#0/background = \"#$color1Hex\" #0/g" /tmp/dunstrc
+    sed -i "s/foreground[ ]*=[ ]*\"#[^\"]*\"[ ]*#0/foreground = \"#$color4Hex\" #0/g" /tmp/dunstrc
+    sed -i "s/background[ ]*=[ ]*\"#[^\"]*\"[ ]*#1/background = \"#$color0Hex\" #1/g" /tmp/dunstrc
+    sed -i "s/foreground[ ]*=[ ]*\"#[^\"]*\"[ ]*#1/foreground = \"#$color4Hex\" #1/g" /tmp/dunstrc
+    sed -i "s/background[ ]*=[ ]*\"#[^\"]*\"[ ]*#2/background = \"#$color3Hex\" #2/g" /tmp/dunstrc
+    sed -i "s/foreground[ ]*=[ ]*\"#[^\"]*\"[ ]*#2/foreground = \"#$color4Hex\" #2/g" /tmp/dunstrc
+
+    mv /tmp/dunstrc "$dunstPath"
     killall dunst && dunst &
 }
 
@@ -166,7 +138,6 @@ updateWaybar() {
     (waybar &) 1>/dev/null
 }
 
-# Heh, it aint stupid if it works!
 editBashRC() {
     lineNum=$(grep -n "export $1" "/tmp/bashrc_original" | cut -d ':' -f 1)
     newLine="export $1='\\${2}'"
@@ -205,15 +176,14 @@ editKitty() {
 
 updateKitty() {
     echo updating the kitty theme...
-    cp "$kittyPath" /tmp/kitty_original
-    cp "$kittyPath" /tmp/kitty_edited
-    editKitty "foreground" "$color4Hex"
-    cp /tmp/kitty_edited /tmp/kitty_original
-    editKitty "background" "$color0Hex"
+    cp "$kittyPath" /tmp/kitty.conf
 
-    cp /tmp/kitty_edited "$kittyPath"
-    rm /tmp/kitty_original
-    rm /tmp/kitty_edited
+    sed -i "s/^#\?[ ]\?foreground[ ]*#.*/foreground #$color4Hex/g" /tmp/kitty.conf
+    sed -i "s/^#\?[ ]\?background[ ]*#.*/background #$color0Hex/g" /tmp/kitty.conf
+    sed -i "s/^#\?[ ]\?background_opacity[ ].*/background_opacity 0.4/g" /tmp/kitty.conf
+    sed -i "s/^#\?[ ]\?background_blur[ ].*/background_blur 1/g" /tmp/kitty.conf
+    
+    mv /tmp/kitty.conf "$kittyPath"
 }
 
 updateQT() {
@@ -290,7 +260,6 @@ case "$1" in
         # Exits the program if in the configuration auto_update is not enabled.
         doAutoUpdate=$(grep -n "auto_update" "$HOME/.config/theme-manager/theme-applier.conf" | cut -d ':' -f 2 | cut -d "=" -f 2)
         [ "$doAutoUpdate" = "1" ] || exit 0 ;;
-    *) printErr 2 "Wrong option: '$1'" ;;
 esac
 
 # read which configs to edit from the config file
