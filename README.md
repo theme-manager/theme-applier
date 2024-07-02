@@ -1,10 +1,9 @@
 # theme-applier
-Applies the active theme in ```$HOME/.config/theme-manager/themes/active``` to config files  
-wich do not depend on .css files.  
+Applies the active theme in ```$HOME/.config/theme-manager/themes/active``` to config files wich do not depend on .css files.  
 Which config files get edited is dependant on the configuration in ```$HOME/.config/theme-manager/theme-applier.conf```.
 
 ## Installation
-The installation is easy. Just put the shell script in your ```$HOME/.config/theme-manager``` directory and create the config file in the same directory.
+The installation is easy. Just put the shell script in your ```$HOME/.config/theme-manager``` directory and run `theme-applier --init` to create a new configuration file inside the same directory. Alternatively you can just create the `theme-applier.conf` yourself.
 
 ## Usage
 
@@ -32,15 +31,18 @@ The installation is easy. Just put the shell script in your ```$HOME/.config/the
                                           <kitty>:        Determines if kitty has to be updated when theme is applied
                                           <qt>:           Determines if qt theme has to be updated when theme is applied
       -g  --get   <name>              Get the value of the variable <name>
+                                          Will print all variables if <name> is 'all'
+      -i  --init                      Starts the initial setup and asks for all variables to set them. Creates the config file.
 
 ## Example config file
 
     # The configuration file for the theme-applier
-    auto_update=0
-    update_hyprland=1
-    update_hyprpaper=1
-    update_dunst=1
-    update_waybar=1
-    update_bashrc=1
-    update_kitty=1
-    update_qt=0
+    auto_update = true
+    update_hyprland = false
+    update_hyprpaper = false
+    update_dunst = false
+    update_waybar = false
+    update_bash = true
+    update_kitty = true
+    update_qt = true
+
