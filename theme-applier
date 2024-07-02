@@ -237,7 +237,7 @@ case "$1" in
                 k) updateKitty ;;
                 q) updateQT ;;
                 w) updateWaybar ;;
-                *) echo Wrong format on option: "$first"; exit 2 ;;
+        *) printErr 2 "Wrong format on option: $first" ;;
             esac
             tmp="$rest"
         done 
@@ -252,7 +252,7 @@ case "$1" in
             kitty) varName='update_kitty' ;;
             qt) varName='update_qt' ;;
             waybar) varName='update_waybar' ;;
-            *) echo Wrong format on option: "$1"; exit 2 ;;
+            *) printErr 2 "Wrong format option: '$1'"
         esac
 
         value=$(grep -n "$varName" "$HOME/.config/theme-manager/theme-applier.conf" | cut -d '=' -f 2)
@@ -262,6 +262,7 @@ case "$1" in
         # Exits the program if in the configuration auto_update is not enabled.
         doAutoUpdate=$(grep -n "auto_update" "$HOME/.config/theme-manager/theme-applier.conf" | cut -d ':' -f 2 | cut -d "=" -f 2)
         [ "$doAutoUpdate" = "1" ] || exit 0 ;;
+    *) printErr 2 "Wrong parameter '$1'" ;;
 esac
 
 # read which configs to edit from the config file
