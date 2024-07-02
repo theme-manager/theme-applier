@@ -223,7 +223,7 @@ editApplierConfig() {
 # check the parameters
 case "$1" in
     -h|--help) printUsage && exit 0 ;;
-    -s|--set) editApplierConfig "$2" "$3" ;;
+    -s|--set) editApplierConfig "$2" "$3" && exit 0 ;;
     -a|--appy)
         tmp="$2"
         while [ -n "$tmp" ]; do
@@ -240,7 +240,8 @@ case "$1" in
                 *) echo Wrong format on option: "$first"; exit 2 ;;
             esac
             tmp="$rest"
-        done ;;
+        done 
+        exit 0 ;;
     -g|--get)
         case "$2" in
             auto) varName='auto_update' ;;
@@ -255,7 +256,8 @@ case "$1" in
         esac
 
         value=$(grep -n "$varName" "$HOME/.config/theme-manager/theme-applier.conf" | cut -d '=' -f 2)
-        echo "$value" ;;
+        echo "$value" 
+        exit 0 ;;
     --auto-update)
         # Exits the program if in the configuration auto_update is not enabled.
         doAutoUpdate=$(grep -n "auto_update" "$HOME/.config/theme-manager/theme-applier.conf" | cut -d ':' -f 2 | cut -d "=" -f 2)
