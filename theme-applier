@@ -72,6 +72,7 @@ color2ShRgb="e[38;2;$(tail -n 3 "$colorShRgbFile" | sed "s/ /;/g" | head -n 1)m"
 color3ShRgb="e[38;2;$(tail -n 2 "$colorShRgbFile" | sed "s/ /;/g" | head -n 1)m"
 color4ShRgb="e[38;2;$(tail -n 1 "$colorShRgbFile" | sed "s/ /;/g")m"
 
+configPath="$HOME/"
 hyprlandPath="$HOME/.config/hypr/hyprland.conf"
 hyprpaperPath="$HOME/.config/hypr/hyprpaper.conf"
 bashrcPath="$HOME/.bashrc"
@@ -194,31 +195,25 @@ updateQT() {
 
 editApplierConfig() {
     case "$1" in
-    auto) varName='auto_update' ;;
-    hyprland) varName='update_hyprland' ;;
-    hyprpaper) varName='update_hyprpaper' ;;
-    dunst) varName='update_dunst' ;;
-    bash) varName='update_bashrc' ;;
-    kitty) varName='update_kitty' ;;
-    qt) varName='update_qt' ;;
-    waybar) varName='update_waybar' ;;
-    *) printErr 2 "Wrong format on option: '$1'" ;;
+        auto) varName='auto_update' ;;
+        hyprland) varName='update_hyprland' ;;
+        hyprpaper) varName='update_hyprpaper' ;;
+        dunst) varName='update_dunst' ;;
+        bash) varName='update_bashrc' ;;
+        kitty) varName='update_kitty' ;;
+        qt) varName='update_qt' ;;
+        waybar) varName='update_waybar' ;;
+        *) printErr 2 "Wrong format on option: '$1'" ;;
     esac
 
     if [ "$2" = "on" ] || [ "$2" = "1" ]; then
-        newLine="$varName=1"
+        state='1'
     elif [ "$2" = "off" ] || [ "$2" = "0" ]; then
-        newLine="$varName=0"
+        state='0'
     else
         printErr 2 "Wrong format on option: '$2'"
     fi
-
-    cp "$HOME/.config/theme-manager/theme-applier.conf" /tmp/theme-applier.conf
-    lineNum=$(grep -n "$varName" "$HOME/.config/theme-manager/theme-applier.conf" | cut -d ':' -f 1)
-    sed -i "${lineNum}"',$d' "$HOME/.config/theme-manager/theme-applier.conf"
-    echo "$newLine" >> "$HOME/.config/theme-manager/theme-applier.conf"
-    lineNum=$((lineNum + 1))
-    tail -n "+$lineNum" "/tmp/theme-applier.conf" >> "$HOME/.config/theme-manager/theme-applier.conf"
+    sed -i "s/$varName.*/\$$varName = $state/g" "$configPath"
 }
 
 # Asks the user if they want a specific variable turned on or off
@@ -278,12 +273,12 @@ case "$1" in
             *) printErr 2 "Wrong format option: '$1'"
         esac
 
-        value=$(grep -n "$varName" "$HOME/.config/theme-manager/theme-applier.conf" | cut -d '=' -f 2)
+        value=$(grep -n "$varName" "$configPath" | cut -d '=' -f 2)
         echo "$value"
         exit 0 ;;
     --auto-update)
         # Exits the program if in the configuration auto_update is not enabled.
-        doAutoUpdate=$(grep -n "auto_update" "$HOME/.config/theme-manager/theme-applier.conf" | cut -d ':' -f 2 | cut -d "=" -f 2)
+        doAutoUpdate=$(grep -n "auto_update" "$configPath" | cut -d ':' -f 2 | cut -d "=" -f 2)
         [ "$doAutoUpdate" = "1" ] || exit 0 ;;
     *) printErr 2 "Wrong parameter '$1'" ;;
 esac
@@ -299,4 +294,4 @@ while IFS= read -r line; do
         "update_kitty=1") updateKitty ;;
         "update_qt=1") updateQT ;;
     esac
-done < "$HOME/.config/theme-manager/theme-applier.conf"
+done < "$configPath"
