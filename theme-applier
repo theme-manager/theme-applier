@@ -32,7 +32,8 @@ Options:
                                         <kitty>:        Determines if kitty has to be updated when theme is applied
                                         <qt>:           Determines if qt theme has to be updated when theme is applied  
     -g  --get   <name>              Get the value of the variable <name>
-    -i  --init                      Starts the initial setup and asks for all variables to set them"
+                                        If <name> is 'all', will print all variables
+    -i  --init                      Starts the initial setup and asks for all variables to set them. Creates the config file."
 }
 
 # error codes
@@ -302,11 +303,13 @@ case "$1" in
             kitty) varName='update_kitty' ;;
             qt) varName='update_qt' ;;
             waybar) varName='update_waybar' ;;
-            *) printErr 2 "Wrong format option: '$1'"
+            all)
+                grep -v '#' "$configPath" | sed 's/\(.*\)/    \1/g'
+                exit 0 ;;
+            *) printErr 2 "Wrong format option: '$2'"
         esac
 
-        value=$(grep -n "$varName" "$configPath" | cut -d '=' -f 2)
-        echo "$value"
+        grep -n "$varName" "$configPath" | cut -d '=' -f 2
         exit 0 ;;
     --auto-update)
         # Exits the program if in the configuration auto_update is not enabled.
