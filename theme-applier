@@ -222,7 +222,7 @@ editApplierConfig() {
 
 # check the parameters
 case "$1" in
-    -h|--help) printUsage ;;
+    -h|--help) printUsage && exit 0 ;;
     -s|--set) editApplierConfig "$2" "$3" ;;
     -a|--appy)
         tmp="$2"
