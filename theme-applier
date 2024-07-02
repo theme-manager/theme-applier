@@ -254,7 +254,7 @@ update_hyprland = $hyprland
 update_hyprpaper = $hyprpaper
 update_dunst = $dunst
 update_waybar = $waybar
-update_bash = $bash
+update_bashrc = $bash
 update_kitty = $kitty
 update_qt = $qt" > "$configPath" 
     
@@ -340,7 +340,7 @@ while IFS= read -r line; do
     stringContains "$line" 'update_hyprpaper' 'true' && updateHyprpaper
     stringContains "$line" 'update_dunst' 'true' && updateDunst
     stringContains "$line" 'update_waybar' 'true' && updateWaybar
-    stringContains "$line" 'update_bash' 'true' && updateBashRC
+    stringContains "$line" 'update_bashrc' 'true' && updateBashRC
     stringContains "$line" 'update_kitty' 'true' && updateKitty
     stringContains "$line" 'update_qt' 'true' && updateQT
 done < "$configPath"

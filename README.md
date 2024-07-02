@@ -42,7 +42,7 @@ The installation is easy. Just put the shell script in your ```$HOME/.config/the
     update_hyprpaper = false
     update_dunst = false
     update_waybar = false
-    update_bash = true
+    update_bashrc = true
     update_kitty = true
     update_qt = true
 
