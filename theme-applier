@@ -31,7 +31,8 @@ Options:
                                         <bash>:         Determines if bashrc has to be updated when theme is applied
                                         <kitty>:        Determines if kitty has to be updated when theme is applied
                                         <qt>:           Determines if qt theme has to be updated when theme is applied  
-    -g  --get   <name>              Get the value of the variable <name>"  
+    -g  --get   <name>              Get the value of the variable <name>
+    -i  --init                      Starts the initial setup and asks for all variables to set them"
 }
 
 # error codes
@@ -107,7 +108,7 @@ updateHyprpaper() {
     cp "$hyprpaperPath" /tmp/hyprpaper.conf
     wallpaper="$(ls "$HOME/.config/theme-manager/themes/active/Wallpaper/")"
     wallpaperPath="$HOME/.config/theme-manager/themes/active/Wallpaper/$wallpaper"
-    
+
     # Replaces all paths with the new path
     sed -i "s|/[^ ]*|$wallpaperPath|g" /tmp/hyprpaper.conf
     mv /tmp/hyprpaper.conf "$hyprpaperPath"
@@ -141,10 +142,10 @@ updateWaybar() {
 editBashRC() {
     lineNum=$(grep -n "export $1" "/tmp/bashrc_original" | cut -d ':' -f 1)
     newLine="export $1='\\${2}'"
-    
+
     sed -i "${lineNum}"',$d' /tmp/bashrc_edited
     echo "$newLine" >> /tmp/bashrc_edited
-    lineNum=$((lineNum+1))
+    lineNum=$((lineNum + 1))
     tail -n "+$lineNum" /tmp/bashrc_original >> /tmp/bashrc_edited
 }
 
@@ -166,10 +167,10 @@ editKitty() {
     lines=$(grep -n "$1 #" "/tmp/kitty_original" | grep -v ':#' | cut -d ':' -f 1)
     for lineNum in $lines; do
         newLine="$1 #$2"
-        
+
         sed -i "${lineNum}"',$d' /tmp/kitty_edited
         echo "$newLine" >> /tmp/kitty_edited
-        lineNum=$((lineNum+1))
+        lineNum=$((lineNum + 1))
         tail -n "+$lineNum" /tmp/kitty_original >> /tmp/kitty_edited
     done
 }
@@ -182,7 +183,7 @@ updateKitty() {
     sed -i "s/^#\?[ ]\?background[ ]*#.*/background #$color0Hex/g" /tmp/kitty.conf
     sed -i "s/^#\?[ ]\?background_opacity[ ].*/background_opacity 0.4/g" /tmp/kitty.conf
     sed -i "s/^#\?[ ]\?background_blur[ ].*/background_blur 1/g" /tmp/kitty.conf
-    
+
     mv /tmp/kitty.conf "$kittyPath"
 }
 
@@ -193,15 +194,15 @@ updateQT() {
 
 editApplierConfig() {
     case "$1" in
-        auto) varName='auto_update' ;;
-        hyprland) varName='update_hyprland' ;;
-        hyprpaper) varName='update_hyprpaper' ;;
-        dunst) varName='update_dunst' ;;
-        bash) varName='update_bashrc' ;;
-        kitty) varName='update_kitty' ;;
-        qt) varName='update_qt' ;;
-        waybar) varName='update_waybar' ;;
-        *) printErr 2 "Wrong format on option: '$1'" ;;
+    auto) varName='auto_update' ;;
+    hyprland) varName='update_hyprland' ;;
+    hyprpaper) varName='update_hyprpaper' ;;
+    dunst) varName='update_dunst' ;;
+    bash) varName='update_bashrc' ;;
+    kitty) varName='update_kitty' ;;
+    qt) varName='update_qt' ;;
+    waybar) varName='update_waybar' ;;
+    *) printErr 2 "Wrong format on option: '$1'" ;;
     esac
 
     if [ "$2" = "on" ] || [ "$2" = "1" ]; then
@@ -216,19 +217,40 @@ editApplierConfig() {
     lineNum=$(grep -n "$varName" "$HOME/.config/theme-manager/theme-applier.conf" | cut -d ':' -f 1)
     sed -i "${lineNum}"',$d' "$HOME/.config/theme-manager/theme-applier.conf"
     echo "$newLine" >> "$HOME/.config/theme-manager/theme-applier.conf"
-    lineNum=$((lineNum+1))
+    lineNum=$((lineNum + 1))
     tail -n "+$lineNum" "/tmp/theme-applier.conf" >> "$HOME/.config/theme-manager/theme-applier.conf"
+}
+
+# Asks the user if they want a specific variable turned on or off
+# $1 - The variable which gets turned on or off
+askToSetVariable() {
+    echo "Do you want to enable editing '$1'? (Y/n)"
+    read -r input
+    if [ "$(echo "$input" | grep -Ei '[Yy][Ee]?[Ss]?')" != "" ]; then
+        echo "input was yes"
+    else
+        echo "input was no"
+    fi
 }
 
 # check the parameters
 case "$1" in
-    -h|--help) printUsage && exit 0 ;;
-    -s|--set) editApplierConfig "$2" "$3" && exit 0 ;;
-    -a|--appy)
+    -h | --help) printUsage && exit 0 ;;
+    -s | --set) editApplierConfig "$2" "$3" && exit 0 ;;
+    -i | --init)
+        askToSetVariable auto
+        askToSetVariable hyprland
+        askToSetVariable hyprpaper
+        askToSetVariable dunst
+        askToSetVariable waybar
+        askToSetVariable bash
+        askToSetVariable kitt
+        askToSetVariable qt ;;
+    -a | --appy)
         tmp="$2"
         while [ -n "$tmp" ]; do
-            rest="${tmp#?}"         # All but the first character of the string
-            first="${tmp%"$rest"}"  # Remove $rest, and you're left with the first character
+            rest="${tmp#?}"        # All but the first character of the string
+            first="${tmp%"$rest"}" # Remove $rest, and you're left with the first character
             case "$first" in
                 h) updateHyprland ;;
                 p) updateHyprpaper ;;
@@ -237,12 +259,13 @@ case "$1" in
                 k) updateKitty ;;
                 q) updateQT ;;
                 w) updateWaybar ;;
-        *) printErr 2 "Wrong format on option: $first" ;;
+                *) printErr 2 "Wrong format on option: $first" ;;
             esac
             tmp="$rest"
-        done 
-        exit 0 ;;
-    -g|--get)
+        done
+        exit 0
+        ;;
+    -g | --get)
         case "$2" in
             auto) varName='auto_update' ;;
             hyprland) varName='update_hyprland' ;;
@@ -256,7 +279,7 @@ case "$1" in
         esac
 
         value=$(grep -n "$varName" "$HOME/.config/theme-manager/theme-applier.conf" | cut -d '=' -f 2)
-        echo "$value" 
+        echo "$value"
         exit 0 ;;
     --auto-update)
         # Exits the program if in the configuration auto_update is not enabled.
