@@ -72,7 +72,7 @@ color2ShRgb="e[38;2;$(tail -n 3 "$colorShRgbFile" | sed "s/ /;/g" | head -n 1)m"
 color3ShRgb="e[38;2;$(tail -n 2 "$colorShRgbFile" | sed "s/ /;/g" | head -n 1)m"
 color4ShRgb="e[38;2;$(tail -n 1 "$colorShRgbFile" | sed "s/ /;/g")m"
 
-configPath="$HOME/"
+configPath="$HOME/.config/theme-manager/theme-applier.conf"
 hyprlandPath="$HOME/.config/hypr/hyprland.conf"
 hyprpaperPath="$HOME/.config/hypr/hyprpaper.conf"
 bashrcPath="$HOME/.bashrc"
@@ -219,28 +219,52 @@ editApplierConfig() {
 # Asks the user if they want a specific variable turned on or off
 # $1 - The variable which gets turned on or off
 askToSetVariable() {
-    echo "Do you want to enable editing '$1'? (Y/n)"
+    echo "Do you want to enable '$1'? (Y/n)"
     read -r input
     if [ "$(echo "$input" | grep -Ei '[Yy][Ee]?[Ss]?')" != "" ]; then
-        echo "input was yes"
+        return 0
     else
-        echo "input was no"
+        return 1
     fi
+}
+
+initializeConfig() {
+    # Initialize all variables as false, reset them to true if the input was yes
+    auto=false
+    hyprland=false
+    hyprpaper=false
+    dunst=false
+    waybar=false
+    bash=false
+    kitty=false
+    qt=false
+    askToSetVariable auto && auto=true
+    askToSetVariable hyprland && hyprland=true
+    askToSetVariable hyprpaper && hyprpaper=true
+    askToSetVariable dunst && dunst=true
+    askToSetVariable waybar && waybar=true
+    askToSetVariable bash && bash=true
+    askToSetVariable kitty && kitty=true
+    askToSetVariable qt && qt=true
+    
+    echo "# The configuration file for the theme-applier
+auto_update = $auto
+update_hyprland = $hyprland
+update_hyprpaper = $hyprpaper
+update_dunst = $dunst
+update_waybar = $waybar
+update_bash = $bash
+update_kitty = $kitty
+update_qt = $qt" > "$configPath" 
+    
+    echo "Configuration file initialized successfully!"
 }
 
 # check the parameters
 case "$1" in
     -h | --help) printUsage && exit 0 ;;
     -s | --set) editApplierConfig "$2" "$3" && exit 0 ;;
-    -i | --init)
-        askToSetVariable auto
-        askToSetVariable hyprland
-        askToSetVariable hyprpaper
-        askToSetVariable dunst
-        askToSetVariable waybar
-        askToSetVariable bash
-        askToSetVariable kitt
-        askToSetVariable qt ;;
+    -i | --init) initializeConfig && exit 0 ;;
     -a | --appy)
         tmp="$2"
         while [ -n "$tmp" ]; do
