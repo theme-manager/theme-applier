@@ -260,6 +260,14 @@ update_qt = $qt" > "$configPath"
     echo "Configuration file initialized successfully!"
 }
 
+if ! [ -r "$configPath" ]; then
+    echo "The configuration file is abscent. 
+You are guided throug the questions needed to create one.
+"
+    initializeConfig
+    exit 0
+fi
+
 # check the parameters
 case "$1" in
     -h | --help) printUsage && exit 0 ;;
