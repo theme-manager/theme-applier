@@ -22,7 +22,7 @@ Options:
                                         b: Applies bashrc
                                         k: Applies kitty
                                         q: Applies qt theme
-    -s  --set   <name> <on/off>     Set the variable <name> to <on/off>
+    -s  --set   <name> <true/false> Set the variable <name> to <true/false>
                                         <auto>:         Automatically apply the current theme on system startup
                                         <hyprland>:     Determines if hyprland has to be updated when theme is applied
                                         <hyprpaper>:    Determines if hyprpaper (Wallpaper) has to be updated when the theme is applied
@@ -207,14 +207,14 @@ editApplierConfig() {
         *) printErr 2 "Wrong format on option: '$1'" ;;
     esac
 
-    if [ "$2" = "on" ] || [ "$2" = "1" ]; then
-        state='1'
-    elif [ "$2" = "off" ] || [ "$2" = "0" ]; then
-        state='0'
+    if [ "$2" = "true" ] || [ "$2" = "1" ]; then
+        state='true'
+    elif [ "$2" = "false" ] || [ "$2" = "0" ]; then
+        state='false'
     else
         printErr 2 "Wrong format on option: '$2'"
     fi
-    sed -i "s/$varName.*/\$$varName = $state/g" "$configPath"
+    sed -i "s/$varName.*/$varName = $state/g" "$configPath"
 }
 
 # Asks the user if they want a specific variable turned on or off
@@ -259,6 +259,22 @@ update_kitty = $kitty
 update_qt = $qt" > "$configPath" 
     
     echo "Configuration file initialized successfully!"
+}
+
+# Checks if a given string contains all of the given substrings
+# $1 - The string which is searched through
+# $2-$# - The substrings for which is searched
+stringContains() {
+    [ $# -lt 2 ] && printErr "There has to be at least one string to search for."
+    input="$1"
+    shift
+    while [ $# -gt 0 ]; do
+        if [ "$(echo "$input" | grep "$1")" = "" ]; then
+            return 1
+        fi
+        shift
+    done
+    return 0
 }
 
 if ! [ -r "$configPath" ]; then
@@ -309,24 +325,22 @@ case "$1" in
             *) printErr 2 "Wrong format option: '$2'"
         esac
 
-        grep -n "$varName" "$configPath" | cut -d '=' -f 2
+        grep "$varName" "$configPath" | sed 's/[^=]*= \([^ ]\)/\1/'
         exit 0 ;;
     --auto-update)
         # Exits the program if in the configuration auto_update is not enabled.
-        doAutoUpdate=$(grep -n "auto_update" "$configPath" | cut -d ':' -f 2 | cut -d "=" -f 2)
-        [ "$doAutoUpdate" = "1" ] || exit 0 ;;
+        doAutoUpdate=$(grep "auto_update" "$configPath" | sed 's/[^=]*= \([^ ]\)/\1/')
+        [ "$doAutoUpdate" = "true" ] || exit 0 ;;
     *) printErr 2 "Wrong parameter '$1'" ;;
 esac
 
 # read which configs to edit from the config file
 while IFS= read -r line; do
-    case "$line" in
-        "update_hyprland=1") updateHyprland ;;
-        "update_hyprpaper=1") updateHyprpaper ;;
-        "update_dunst=1") updateDunst ;;
-        "update_waybar=1") updateWaybar ;;
-        "update_bashrc=1") updateBashRC ;;
-        "update_kitty=1") updateKitty ;;
-        "update_qt=1") updateQT ;;
-    esac
+    stringContains "$line" 'update_hyprland' 'true' && updateHyprland
+    stringContains "$line" 'update_hyprpaper' 'true' && updateHyprpaper
+    stringContains "$line" 'update_dunst' 'true' && updateDunst
+    stringContains "$line" 'update_waybar' 'true' && updateWaybar
+    stringContains "$line" 'update_bash' 'true' && updateBashRC
+    stringContains "$line" 'update_kitty' 'true' && updateKitty
+    stringContains "$line" 'update_qt' 'true' && updateQT
 done < "$configPath"
