@@ -115,7 +115,7 @@ updateHyprpaper() {
     sed -i "s|/[^ ]*|$wallpaperPath.|g" '/tmp/hyprpaper.conf'
     mv '/tmp/hyprpaper.conf' "$hyprpaperPath"
 
-    (pkill 'hyprpaper') 1>/dev/null
+    pkill hyprpaper
     (hyprpaper &) 1>/dev/null
 }
 
@@ -132,7 +132,8 @@ updateDunst() {
     sed -i "s/foreground[ ]*=[ ]*\"#[^\"]*\"[ ]*#2/foreground = \"#$color4Hex\" #2/g" '/tmp/dunstrc'
 
     mv '/tmp/dunstrc' "$dunstPath"
-    killall 'dunst' && dunst &
+    pkill dunst
+    (dunst &) 1>/dev/null
 }
 
 updateWaybar() {
