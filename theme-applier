@@ -111,8 +111,11 @@ updateHyprpaper() {
     wallpaper="$(ls "$HOME/.config/theme-manager/themes/active/Wallpaper/")"
     wallpaperPath="$HOME/.config/theme-manager/themes/active/Wallpaper/$wallpaper"
 
+    echo "hyprpaperPath: '$hyprpaperPath'"
+    echo "wallpaper: '$wallpaper'"
+    echo "wallpaperPath: '$wallpaperPath'"
     # Replaces all paths with the new path
-    sed -i "s|/[^ ]*|$wallpaperPath.|g" '/tmp/hyprpaper.conf'
+    sed -i "s|/[^ ]*|$wallpaperPath|g" '/tmp/hyprpaper.conf'
     mv '/tmp/hyprpaper.conf' "$hyprpaperPath"
 
     pkill hyprpaper
@@ -132,8 +135,7 @@ updateDunst() {
     sed -i "s/foreground[ ]*=[ ]*\"#[^\"]*\"[ ]*#2/foreground = \"#$color4Hex\" #2/g" '/tmp/dunstrc'
 
     mv '/tmp/dunstrc' "$dunstPath"
-    pkill dunst
-    (dunst &) 1>/dev/null
+    (pkill dunst && dunst &) &>/dev/null
 }
 
 updateWaybar() {
