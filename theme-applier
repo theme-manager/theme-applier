@@ -115,7 +115,7 @@ updateHyprpaper() {
     sed -i "s|/[^ ]*|$wallpaperPath.|g" '/tmp/hyprpaper.conf'
     mv '/tmp/hyprpaper.conf' "$hyprpaperPath"
 
-    (killall 'hyprpaper') 1>/dev/null
+    (pkill 'hyprpaper') 1>/dev/null
     (hyprpaper &) 1>/dev/null
 }
 
