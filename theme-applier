@@ -112,7 +112,7 @@ updateHyprpaper() {
     wallpaperPath="$HOME/.config/theme-manager/themes/active/Wallpaper/$wallpaper"
 
     # Replaces all paths with the new path
-    sed -i "s|/[^ ]*|$wallpaperPath|g" '/tmp/hyprpaper.conf'
+    sed -i "s|/[^ ]*|$wallpaperPath.|g" '/tmp/hyprpaper.conf'
     mv '/tmp/hyprpaper.conf' "$hyprpaperPath"
 
     (killall 'hyprpaper') 1>/dev/null
