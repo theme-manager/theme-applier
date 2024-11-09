@@ -108,12 +108,9 @@ updateHyprland() {
 updateHyprpaper() {
     echo 'updating the hyprpaper wallpaper path...'
     cp "$hyprpaperPath" '/tmp/hyprpaper.conf'
-    wallpaper="$(ls "$HOME/.config/theme-manager/themes/active/Wallpaper/")"
+    wallpaper="$(find "$HOME/.config/theme-manager/themes/active/Wallpaper/" -name "wallpaper.*" -exec basename {} \;)"
     wallpaperPath="$HOME/.config/theme-manager/themes/active/Wallpaper/$wallpaper"
 
-    echo "hyprpaperPath: '$hyprpaperPath'"
-    echo "wallpaper: '$wallpaper'"
-    echo "wallpaperPath: '$wallpaperPath'"
     # Replaces all paths with the new path
     sed -i "s|/[^ ]*|$wallpaperPath|g" '/tmp/hyprpaper.conf'
     mv '/tmp/hyprpaper.conf' "$hyprpaperPath"
